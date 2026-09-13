@@ -69,7 +69,7 @@ flowchart TD
 
 ## 🗄️ 5. Banco de Dados em Nuvem (Azure SQL Database - PaaS)
 
-- **Serviço Utilizado:** Azure SQL Database (PaaS) — 
+- **Serviço Utilizado:** Azure SQL Database (PaaS)
 - **Arquivo DDL Entregue:** O script DDL completo, com todas as tabelas, colunas, chaves primárias, chaves estrangeiras, constraints, sequences, índices e comentários, está disponível no arquivo:
   - [`script_bd.sql`] e em [`database/script_bd.sql`].
 
@@ -162,6 +162,7 @@ Todos os recursos de nuvem e processos de deploy são 100% automatizados por scr
 
 | Script | Finalidade | Descrição Técnica |
 | :--- | :--- | :--- |
+| [`00-GERAR-CHAVES.sh`] | Segurança / Criptografia | Cria o diretório `Keys` e gera o par de chaves RSA (`private_key.pem` e `public_key.pem`) para autenticação e segurança do backend. |
 | [`01-INFRAESTRUTURA-AZURE.sh`] | Provisionamento PaaS | Cria Resource Group (`petcare-rg`), Azure SQL Server (`petcare-sql-server`), Azure SQL Database (`petcare-db`), regras de firewall e Web App no Azure App Service com runtime Java 17. |
 | [`02-CONFIGURAR-E-DEPLOY.sh`] | Build & Deploy | Injeta connection strings seguras no App Service, compila o backend com Maven (`mvn clean package -DskipTests`) e faz deploy do arquivo `.jar` no Azure. |
 | [`03-VERIFICAR-AZURE.sh`] | Testes & Verificação | Consulta o status `Running`, obtém a URL pública HTTPS, valida configurações de Java e testa resposta HTTP da API. |
@@ -183,27 +184,33 @@ chmod +x script/*.sh
 az login
 ```
 
-### 3. Criar a Infraestrutura no Azure (PaaS)
+### 3. Gerar Chaves Criptográficas (RSA)
+Gera o par de chaves privada e pública exigido para inicialização segura da aplicação Spring Boot:
+```bash
+./script/00-GERAR-CHAVES.sh
+```
+
+### 4. Criar a Infraestrutura no Azure (PaaS)
 ```bash
 ./script/01-INFRAESTRUTURA-AZURE.sh
 ```
 
-### 4. Configurar Variáveis e Realizar o Deploy
+### 5. Configurar Variáveis e Realizar o Deploy
 ```bash
 ./script/02-CONFIGURAR-E-DEPLOY.sh
 ```
 
-### 5. Verificar a Aplicação Publicada
+### 6. Verificar a Aplicação Publicada
 ```bash
 ./script/03-VERIFICAR-AZURE.sh
 ```
 
-### 6. Acompanhar Logs em Tempo Real (Opcional)
+### 7. Acompanhar Logs em Tempo Real (Opcional)
 ```bash
 az webapp log tail --resource-group petcare-rg --name petcare-hub-api
 ```
 
-### 7. Excluir Recursos ao Final do Ciclo (Limpeza)
+### 8. Excluir Recursos ao Final do Ciclo (Limpeza)
 > [!CAUTION]
 > Execute somente após o encerramento dos testes e gravação do vídeo.
 ```bash
@@ -221,7 +228,7 @@ az webapp log tail --resource-group petcare-rg --name petcare-hub-api
 
 ---
 
-## 👥 11. Integrantes da Equipe
+## 👥 10. Integrantes da Equipe
 
 | Nome Completo | RM | Turma | GitHub | LinkedIn |
 | :--- | :---: | :---: | :--- | :--- |
