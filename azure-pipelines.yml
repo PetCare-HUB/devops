@@ -1,7 +1,6 @@
+
 # Maven
-# Build your Java project and run tests with Apache Maven.
-# Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/java
+# Build do projeto Java e execução dos testes.
 
 trigger:
   - master
@@ -18,12 +17,29 @@ steps:
       jdkArchitectureOption: 'x64'
       jdkSourceOption: 'PreInstalled'
 
+  # Baixar chave privada RSA
+  - task: DownloadSecureFile@1
+    name: privateKey
+    displayName: 'Baixar chave privada RSA'
+    inputs:
+      secureFile: 'private_key.pem'
+
+  # Baixar chave pública RSA
+  - task: DownloadSecureFile@1
+    name: publicKey
+    displayName: 'Baixar chave pública RSA'
+    inputs:
+      secureFile: 'public_key.pem'
+
   # Compilar e executar os testes
   - script: |
       chmod +x ./mvnw
       ./mvnw -B clean verify
     workingDirectory: 'backend'
     displayName: 'Build e testes Maven'
+    env:
+      RSA_PRIVATE_KEY: 'file:$(privateKey.secureFilePath)'
+      RSA_PUBLIC_KEY: 'file:$(publicKey.secureFilePath)'
 
   # Copiar o JAR para a pasta de publicação
   - task: CopyFiles@2
