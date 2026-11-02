@@ -1,0 +1,42 @@
+# Maven
+# Build your Java project and run tests with Apache Maven.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/java
+
+trigger:
+  - master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  # Configurar Java 17
+  - task: JavaToolInstaller@0
+    displayName: 'Configurar Java 17'
+    inputs:
+      versionSpec: '17'
+      jdkArchitectureOption: 'x64'
+      jdkSourceOption: 'PreInstalled'
+
+  # Compilar e executar os testes
+  - script: |
+      chmod +x ./mvnw
+      ./mvnw -B clean verify
+    workingDirectory: 'backend'
+    displayName: 'Build e testes Maven'
+
+  # Copiar o JAR para a pasta de publicação
+  - task: CopyFiles@2
+    displayName: 'Preparar artefato'
+    inputs:
+      SourceFolder: 'backend/target'
+      Contents: '*.jar'
+      TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+  # Publicar o artefato
+  - task: PublishPipelineArtifact@1
+    displayName: 'Publicar artefato'
+    inputs:
+      targetPath: '$(Build.ArtifactStagingDirectory)'
+      artifact: 'petcarehub-api'
+      publishLocation: 'pipeline'
