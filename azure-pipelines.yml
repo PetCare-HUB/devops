@@ -1,0 +1,76 @@
+# =====================================================
+# CI - Integração Contínua (Sprint 4)
+# Dispara a cada alteração na branch master:
+# 1) baixa as chaves RSA da Library (Secure files)
+# 2) compila e roda os testes
+# 3) gera e publica o artefato
+# As chaves NÃO ficam no GitHub: só existem no Azure DevOps.
+# =====================================================
+
+trigger:
+  - master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+# Variáveis protegidas (Library > Variable groups > petcare-secrets)
+variables:
+  - group: petcare-secrets
+
+steps:
+  # Configurar Java 17
+  - task: JavaToolInstaller@0
+    displayName: 'Configurar Java 17'
+    inputs:
+      versionSpec: '17'
+      jdkArchitectureOption: 'x64'
+      jdkSourceOption: 'PreInstalled'
+
+  # Baixar a chave privada (protegida na Library > Secure files)
+  - task: DownloadSecureFile@1
+    name: privateKey
+    displayName: 'Baixar chave privada RSA'
+    inputs:
+      secureFile: 'private_key.pem'
+
+  # Baixar a chave pública
+  - task: DownloadSecureFile@1
+    name: publicKey
+    displayName: 'Baixar chave pública RSA'
+    inputs:
+      secureFile: 'public_key.pem'
+
+  # Colocar as chaves dentro do projeto, para entrarem no .jar
+  - script: |
+      mkdir -p backend/src/main/resources/Keys
+      cp "$(privateKey.secureFilePath)" backend/src/main/resources/Keys/private_key.pem
+      cp "$(publicKey.secureFilePath)" backend/src/main/resources/Keys/public_key.pem
+      ls -l backend/src/main/resources/Keys
+    displayName: 'Copiar chaves para o projeto'
+
+  # Compilar e executar os testes (com acesso ao banco)
+  - script: |
+      chmod +x ./mvnw
+      ./mvnw -B clean verify
+    workingDirectory: '$(Build.SourcesDirectory)/backend'
+    displayName: 'Build e testes Maven'
+    env:
+      DB_URL: $(DB_URL)
+      DB_USERNAME: $(DB_USERNAME)
+      DB_PASSWORD: $(DB_PASSWORD)
+
+  # Copiar o JAR para a pasta de publicação
+  - task: CopyFiles@2
+    displayName: 'Preparar artefato'
+    inputs:
+      SourceFolder: '$(Build.SourcesDirectory)/backend/target'
+      Contents: '*.jar'
+      TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+  # Publicar o artefato
+  - task: PublishPipelineArtifact@1
+    displayName: 'Publicar artefato'
+    inputs:
+      targetPath: '$(Build.ArtifactStagingDirectory)'
+      artifact: 'petcarehub-api'
+      publishLocation: 'pipeline'
