@@ -1,4 +1,3 @@
-
 # Maven
 # Build do projeto Java e execução dos testes.
 
@@ -30,13 +29,6 @@ steps:
     displayName: 'Baixar chave pública RSA'
     inputs:
       secureFile: 'public_key.pem'
-
-  - task: AzureKeyVault@2
-    inputs:
-      azureSubscription: '2TDSPG-2026-RM565554-Alexander (134e2415-adbb-42eb-9a26-db8ec08f5ffd)'
-      KeyVaultName: 'PetKeyPublic'
-      SecretsFilter: '*'
-      RunAsPreJob: false
 
   # Compilar e executar os testes
   - script: |
