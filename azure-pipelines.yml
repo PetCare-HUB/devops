@@ -31,6 +31,13 @@ steps:
     inputs:
       secureFile: 'public_key.pem'
 
+  - task: AzureKeyVault@2
+    inputs:
+      azureSubscription: '2TDSPG-2026-RM565554-Alexander (134e2415-adbb-42eb-9a26-db8ec08f5ffd)'
+      KeyVaultName: 'PetKeyPublic'
+      SecretsFilter: '*'
+      RunAsPreJob: false
+
   # Compilar e executar os testes
   - script: |
       chmod +x ./mvnw
@@ -48,6 +55,7 @@ steps:
       SourceFolder: '$(Build.SourcesDirectory)/backend/target'
       Contents: '*.jar'
       TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
 
   # Publicar o artefato
   - task: PublishPipelineArtifact@1
