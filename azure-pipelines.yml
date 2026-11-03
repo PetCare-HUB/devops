@@ -1,0 +1,58 @@
+
+# Maven
+# Build do projeto Java e execução dos testes.
+
+trigger:
+  - master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  # Configurar Java 17
+  - task: JavaToolInstaller@0
+    displayName: 'Configurar Java 17'
+    inputs:
+      versionSpec: '17'
+      jdkArchitectureOption: 'x64'
+      jdkSourceOption: 'PreInstalled'
+
+  # Baixar chave privada RSA
+  - task: DownloadSecureFile@1
+    name: privateKey
+    displayName: 'Baixar chave privada RSA'
+    inputs:
+      secureFile: 'private_key.pem'
+
+  # Baixar chave pública RSA
+  - task: DownloadSecureFile@1
+    name: publicKey
+    displayName: 'Baixar chave pública RSA'
+    inputs:
+      secureFile: 'public_key.pem'
+
+  # Compilar e executar os testes
+  - script: |
+      chmod +x ./mvnw
+      ./mvnw -B clean verify
+    workingDirectory: '$(Build.SourcesDirectory)/backend'
+    displayName: 'Build e testes Maven'
+    env:
+      RSA_PRIVATE_KEY: 'file:$(privateKey.secureFilePath)'
+      RSA_PUBLIC_KEY: 'file:$(publicKey.secureFilePath)'
+
+  # Copiar o JAR para a pasta de publicação
+  - task: CopyFiles@2
+    displayName: 'Preparar artefato'
+    inputs:
+      SourceFolder: '$(Build.SourcesDirectory)/backend/target'
+      Contents: '*.jar'
+      TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+  # Publicar o artefato
+  - task: PublishPipelineArtifact@1
+    displayName: 'Publicar artefato'
+    inputs:
+      targetPath: '$(Build.ArtifactStagingDirectory)'
+      artifact: 'petcarehub-api'
+      publishLocation: 'pipeline'
