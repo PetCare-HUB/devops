@@ -12,7 +12,7 @@ public class SwaggerConfig {
     public OpenAPI petCareHubOpenApi() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("PetCare Hub - API Java | Entrega Final Sprint 4")
+                        .title("PetCare Hub - API Java | Entrega Final Sprint 4 - FIAP")
                         .version("1.2.0")
                         .description("API principal do PetCare Hub: pets, responsáveis, consultas, leituras IoT, score de saúde, alertas e plano preventivo."));
     }
