@@ -25,7 +25,7 @@ SQL_DATABASE="${SQL_DATABASE:-petcare-db}"
 SQL_ADMIN="${SQL_ADMIN:-user-PetCareHub}"
 
 #coloca sua senha depois
-SQL_PASSWORD=""
+SQL_PASSWORD="${SQL_PASSWORD:?ERRO: defina antes -> export SQL_PASSWORD='SuaSenha'}"
 
 APP_PLAN="${APP_PLAN:-petcare-plan}"
 WEB_APP="${WEB_APP:-petcare-hub-api}"

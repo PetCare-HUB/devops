@@ -132,7 +132,7 @@ Nenhuma senha, usuário ou chave fica no código-fonte:
 
 - **Serviço:** Azure SQL Database (PaaS).
 - **Estrutura:** criada automaticamente pelo **Flyway** na primeira inicialização da API (`backend/src/main/resources/db/migration`).
-- **DDL completo:** [`database/script_bd_az.sql`](database/script_bd_az.sql).
+- **DDL completo:** [`database/script_bd.sql`](database/script_bd.sql).
 - **Tabelas core:** `TUTOR`, `CLINICA`, `PET`, `CONSULTA`, `PROTOCOLO_PREVENTIVO`, `EVENTO_PREVENTIVO`, `DISPOSITIVO_IOT`, `LEITURA_COLEIRA`, `LEITURA_COMEDOURO`, `LEITURA_AMBIENTE`, `ALERTA_SAUDE`, `SCORE_SAUDE`.
 
 ---
@@ -304,7 +304,7 @@ devops/
 ├── docs/
 │   └── arquitetura.png        # Diagrama de arquitetura + fluxo CI/CD
 ├── database/
-│   └── script_bd_az.sql       # DDL completo do banco
+│   └── script_bd.sql       # DDL completo do banco
 ├── script/                    # Scripts Azure CLI
 │   ├── 00-GERAR-CHAVES.sh
 │   ├── 01-INFRAESTRUTURA.sh
