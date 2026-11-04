@@ -2,8 +2,8 @@
 # CI - Integração Contínua (Sprint 4)
 # Dispara a cada alteração na branch master:
 # 1) baixa as chaves RSA da Library (Secure files)
-# 2) compila e roda os testes
-# 3) gera e publica o artefato
+# 2) executa os testes automatizados e publica o resultado
+# 3) gera e publica o artefato (.jar)
 # As chaves NÃO ficam no GitHub: só existem no Azure DevOps.
 # =====================================================
 
@@ -48,16 +48,32 @@ steps:
       ls -l backend/src/main/resources/Keys
     displayName: 'Copiar chaves para o projeto'
 
-  # Compilar e executar os testes (com acesso ao banco)
+  # ETAPA DE TESTES: executa os testes automatizados (JUnit)
   - script: |
       chmod +x ./mvnw
-      ./mvnw -B clean verify
+      ./mvnw -B clean test
     workingDirectory: '$(Build.SourcesDirectory)/backend'
-    displayName: 'Build e testes Maven'
+    displayName: 'Executar testes automatizados'
     env:
       DB_URL: $(DB_URL)
       DB_USERNAME: $(DB_USERNAME)
       DB_PASSWORD: $(DB_PASSWORD)
+
+  # Publicar o resultado dos testes (aparece na aba "Tests" da execução)
+  - task: PublishTestResults@2
+    displayName: 'Publicar resultado dos testes'
+    condition: succeededOrFailed()
+    inputs:
+      testResultsFormat: 'JUnit'
+      testResultsFiles: '**/surefire-reports/TEST-*.xml'
+      searchFolder: '$(Build.SourcesDirectory)/backend'
+      testRunTitle: 'Testes automatizados - PetCare Hub'
+      failTaskOnFailedTests: true
+
+  # BUILD: gera o pacote .jar (os testes já rodaram na etapa anterior)
+  - script: ./mvnw -B package -DskipTests
+    workingDirectory: '$(Build.SourcesDirectory)/backend'
+    displayName: 'Gerar pacote (.jar)'
 
   # Copiar o JAR para a pasta de publicação
   - task: CopyFiles@2
@@ -67,7 +83,7 @@ steps:
       Contents: '*.jar'
       TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
-  # Publicar o artefato
+  # Publicar o artefato no Azure DevOps
   - task: PublishPipelineArtifact@1
     displayName: 'Publicar artefato'
     inputs:
