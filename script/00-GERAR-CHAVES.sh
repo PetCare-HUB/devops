@@ -1,12 +1,23 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# ============================================================
+# PETCARE HUB - 00 - GERAR CHAVES RSA PARA O JWT
+# Gera a chave privada no formato PKCS#8 (-----BEGIN PRIVATE KEY-----),
+# que é o formato que o Spring Security exige.
+# Rodar na raiz do projeto: bash script/00-GERAR-CHAVES.sh
+# ============================================================
 
-mkdir -p backend/src/main/resources/Keys
+set -Eeuo pipefail
 
-openssl genrsa -out backend/src/main/resources/Keys/private_key.pem 2048
+DIR="backend/src/main/resources/Keys"
+mkdir -p "$DIR"
 
-openssl rsa \
-  -in backend/src/main/resources/Keys/private_key.pem \
-  -pubout \
-  -out backend/src/main/resources/Keys/public_key.pem
+# Chave privada PKCS#8 (genpkey sempre gera nesse formato)
+openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out "$DIR/private_key.pem"
 
-echo "Chaves RSA geradas com sucesso."
+# Chave pública correspondente
+openssl pkey -in "$DIR/private_key.pem" -pubout -out "$DIR/public_key.pem"
+
+echo "Primeira linha da chave privada (tem que ser BEGIN PRIVATE KEY):"
+head -n 1 "$DIR/private_key.pem"
+echo "Primeira linha da chave pública (tem que ser BEGIN PUBLIC KEY):"
+head -n 1 "$DIR/public_key.pem"
