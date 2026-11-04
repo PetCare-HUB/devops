@@ -75,13 +75,12 @@ steps:
     workingDirectory: '$(Build.SourcesDirectory)/backend'
     displayName: 'Gerar pacote (.jar)'
 
-  # Copiar o JAR para a pasta de publicação
-  - task: CopyFiles@2
-    displayName: 'Preparar artefato'
-    inputs:
-      SourceFolder: '$(Build.SourcesDirectory)/backend/target'
-      Contents: '*.jar'
-      TargetFolder: '$(Build.ArtifactStagingDirectory)'
+  # Preparar o artefato com o nome app.jar
+  # (é o arquivo que o Azure App Service Linux executa)
+  - script: |
+      cp backend/target/*.jar "$(Build.ArtifactStagingDirectory)/app.jar"
+      ls -l "$(Build.ArtifactStagingDirectory)"
+    displayName: 'Preparar artefato (app.jar)'
 
   # Publicar o artefato no Azure DevOps
   - task: PublishPipelineArtifact@1
